@@ -1,28 +1,38 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/yhat/scrape"
-	"golang.org/x/net/html"
 )
 
 var (
-	prefix  string
-	baseURL *url.URL
+	config Configuration
 )
 
+// Configuration holds config values
+type Configuration struct {
+	Token  string
+	Prefix string
+}
+
 func init() {
-	prefix = "!"
-	baseURL, err := url.Parse("http://info.rpi.edu/people/search/")
+	// Read config file
+	file, _ := os.Open("config.json")
+	decoder := json.NewDecoder(file)
+	err := decoder.Decode(config)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Config loaded.")
 }
 
 func main() {
-	dg, err := discordgo.New("Bot " + Token)
+	dg, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
 		fmt.Println("Error!", err)
 		return
@@ -46,53 +56,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-
-	if !strings.HasPrefix(m.Content, prefix) {
+	if !strings.HasPrefix(m.Content, config.Prefix) {
 		return
 	}
 
 	splt := strings.Split(m.Content, " ")
 	cmd := splt[0][1:]
-	content := splt[1:]
-
-	if cmd == "register" && (len(splt) == 2) {
-		handleRegister(content[0])
-	}
-}
-
-func handleRegister(rcsid string, s *discordgo.Session, m *discordgo.MessageCreate) {
-	end, _ := url.Parse(rcsid)
-	urlStr := baseURL.ResolveReference(end)
-
-	resp, err := http.Get(urlStr.String())
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Unable to retrieve info. Directory may be down.")
-		return
-	}
-	root, err := html.Parse(resp.Body)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Unable to retrieve info. Directory may be down.")
-		return
-	}
-
-	// Only find first result
-	// If no result is found, assume user put in rcsid wrong
-	result, ok := scrape.Find(root, scrape.ByClass("search-results"))
-	if !ok {
-		s.ChannelMessageSend(m.ChannelID, "Invalid RCSID.")
-		return
-	}
-	status, ok := scrape.Find(result, scrape.ByClass("field-name-field-status"))
-	if !ok {
-		s.ChannelMessageSend(m.ChannelID, "Invalid RCSID.")
-		return
-	}
-	class := scrape.Text(status)[:2]
-
-	if class != "SR" || class != "JR" || class != "SO" || class != "FR" {
-		s.ChannelMessageSend(m.ChannelID, "It does not seem like you are a student.")
-		return
-	}
-
-	s.ChannelMessageSend(m.ChannelID, "Student status confirmed!")
+	args := splt[1:]
 }
