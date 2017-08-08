@@ -1,12 +1,11 @@
 package commands
 
-// Register struct class
-type Register struct{}
+// Prefix struct class
+type Prefix struct{}
 
-func handle(args string) error {
-	main.Config.Token = args
+func (p *Prefix) handle() error {
 	return nil
 }
 
-func (r *Register) description() string { return "Changes command prefix." }
-func (r *Register) usage() string       { return "<newprefix>" }
+func (p *Prefix) description() string { return "Changes command prefix." }
+func (p *Prefix) usage() string       { return "<newprefix>" }
