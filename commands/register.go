@@ -3,24 +3,16 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
-	"strings"
-
-	"github.com/yhat/scrape"
-	"golang.org/x/net/html"
-)
-
-var (
-	baseURL, _ = url.Parse("http://info.rpi.edu/people/search/")
 )
 
 // Register struct class
-type Register struct{}
+type Register struct {
+	CASAuthURL     string
+	CASRedirectURL string
+}
 
 func (r *Register) handle(ctx Context) error {
-	rcsid := ctx.Args[0]
-
 	// Check if student is already registered
 	ch, err := ctx.Sess.State.Channel(ctx.Msg.ChannelID)
 	if err != nil {
@@ -37,50 +29,18 @@ func (r *Register) handle(ctx Context) error {
 		}
 	}
 
-	end, _ := url.Parse(rcsid)
-	urlStr := baseURL.ResolveReference(end)
+	// Build the full login URL
+	u, _ := url.Parse(r.CASAuthURL)
+	q := u.Query()
+	q.Add("service", r.CASRedirectURL)
+	u.RawQuery = q.Encode()
 
-	resp, err := http.Get(urlStr.String())
-	if err != nil {
-		return errors.New("unable to retrieve info")
-	}
-	root, err := html.Parse(resp.Body)
-	if err != nil {
-		return errors.New("unable to retrieve info")
-	}
+	ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "Please go to "+u.String()+" to start the registration process.")
 
-	// Only find first result
-	// If no result is found, assume user put in rcsid wrong
-	result, ok := scrape.Find(root, scrape.ByClass("search-results"))
-	if !ok {
-		return errors.New("invalid RCSID")
-	}
-
-	email, ok := scrape.Find(result, scrape.ByClass("field-name-field-email"))
-	if !ok {
-		return errors.New("could not find email")
-	}
-	if !strings.HasPrefix(scrape.Text(email), rcsid) {
-		ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "Not a valid RCSID!")
-		return errors.New("invalid RCSID")
-	}
-
-	status, ok := scrape.Find(result, scrape.ByClass("field-name-field-status"))
-	if !ok {
-		return errors.New("could not find class status")
-	}
-	class := scrape.Text(status)[:2]
-
-	if class != "SR" && class != "JR" && class != "SO" && class != "FR" {
-		return errors.New("listed as inactive student")
-	}
-
-	ctx.Sess.GuildMemberRoleAdd(ch.GuildID, ctx.Msg.Author.ID, rid)
-	ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "Successfully registered as a student!")
 	return nil
 }
 
 func (r *Register) description() string {
 	return "Allows the user to register for the \"student role\". A valid RCSID is required."
 }
-func (r *Register) usage() string { return "<rcsid>" }
+func (r *Register) usage() string { return "" }

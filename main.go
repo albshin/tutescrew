@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
 	"github.com/albshin/teamRPI-bot/commands"
+	"github.com/albshin/teamRPI-bot/router"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -20,8 +22,10 @@ var (
 
 // Configuration holds config values
 type Configuration struct {
-	Token  string
-	Prefix string
+	Token          string
+	Prefix         string
+	CASAuthURL     string
+	CASRedirectURL string
 }
 
 func init() {
@@ -45,7 +49,7 @@ func main() {
 	dg.AddHandler(messageCreate)
 
 	h = &commands.Handler{Commands: make(map[string]commands.Command)}
-	h.AddCommand("register", &commands.Register{})
+	h.AddCommand("register", &commands.Register{CASAuthURL: config.CASAuthURL, CASRedirectURL: config.CASRedirectURL})
 
 	err = dg.Open()
 	if err != nil {
@@ -54,6 +58,11 @@ func main() {
 	}
 
 	fmt.Println("Bot is running...")
+
+	r := router.Router(config.CASAuthURL, config.CASRedirectURL)
+	http.ListenAndServe(":8080", r)
+
+	fmt.Println("Web server is running...")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
