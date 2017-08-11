@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/albshin/teamRPI-bot/config"
+	"github.com/albshin/tutescrew/config"
 )
 
 // Register struct class

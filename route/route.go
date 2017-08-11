@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/albshin/teamRPI-bot/commands"
-	"github.com/albshin/teamRPI-bot/config"
+	"github.com/albshin/tutescrew/commands"
+	"github.com/albshin/tutescrew/config"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/julienschmidt/httprouter"
@@ -80,7 +80,7 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		Timeout: time.Second * 10,
 	}
 	req, _ := http.NewRequest("GET", u.String(), nil)
-	r.Header.Add("User-Agent", "teamRPI Discord Bot")
+	r.Header.Add("User-Agent", "TuteScrew Discord Bot")
 
 	resp, err := c.Do(req)
 	if err != nil {

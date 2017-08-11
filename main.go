@@ -9,9 +9,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/albshin/teamRPI-bot/commands"
-	"github.com/albshin/teamRPI-bot/config"
-	"github.com/albshin/teamRPI-bot/route"
+	"github.com/albshin/tutescrew/commands"
+	"github.com/albshin/tutescrew/config"
+	"github.com/albshin/tutescrew/route"
 	"github.com/bwmarrin/discordgo"
 )
 

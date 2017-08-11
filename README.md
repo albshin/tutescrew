@@ -1,12 +1,12 @@
-# TeamRPI Bot
+# TuteScrew
 
-TeamRPI Bot is a Discord chat bot written in Go.
+TuteScrew is a Discord chat bot written in Go for teamRPI's Discord.
 
 # Getting Started
 ## Installation
 
 1. Install Go
-2. Run `go get github.com/albshin/teamRPI-bot`
+2. Run `go get github.com/albshin/tutescrew`
 3. Fill out the configuration file *see below*
 
 ## Configuration
