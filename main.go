@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,36 +10,23 @@ import (
 	"syscall"
 
 	"github.com/albshin/teamRPI-bot/commands"
+	"github.com/albshin/teamRPI-bot/config"
 	"github.com/albshin/teamRPI-bot/route"
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
-	config Configuration
-	h      *commands.Handler
+	cfg config.Configuration
+	h   *commands.Handler
 )
 
-// Configuration holds config values
-type Configuration struct {
-	Token          string
-	Prefix         string
-	CASAuthURL     string
-	CASRedirectURL string
-}
-
-func init() {
-	// Read config file
-	file, _ := os.Open("config.json")
-	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&config)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Config loaded.")
-}
-
 func main() {
-	dg, err := discordgo.New("Bot " + config.Token)
+	err := config.LoadConfig(&cfg)
+	if err != nil {
+		log.Fatal("Config could not be read correctly!")
+	}
+
+	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		fmt.Println("Error!", err)
 		return
@@ -49,7 +35,7 @@ func main() {
 	dg.AddHandler(messageCreate)
 
 	h = &commands.Handler{Commands: make(map[string]commands.Command)}
-	h.AddCommand("register", &commands.Register{CASAuthURL: config.CASAuthURL, CASRedirectURL: config.CASRedirectURL})
+	h.AddCommand("register", &commands.Register{Config: cfg.CASInfo})
 
 	err = dg.Open()
 	if err != nil {
@@ -59,7 +45,7 @@ func main() {
 
 	fmt.Println("Bot is running...")
 
-	r := route.Router(config.CASAuthURL, config.CASRedirectURL, dg)
+	r := route.Router(cfg.CASInfo, dg)
 	http.ListenAndServe(":8080", r)
 
 	fmt.Println("Web server is running...")
@@ -75,7 +61,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	if !strings.HasPrefix(m.Content, config.Prefix) {
+	if !strings.HasPrefix(m.Content, cfg.Prefix) {
 		return
 	}
 

@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+
+	"github.com/albshin/teamRPI-bot/config"
 )
 
 // Register struct class
 type Register struct {
-	CASAuthURL     string
-	CASRedirectURL string
+	Config config.CASConfig
 }
 
 func (r *Register) handle(ctx Context) error {
@@ -30,11 +31,11 @@ func (r *Register) handle(ctx Context) error {
 	}
 
 	// Build the full login URL
-	u, _ := url.Parse(r.CASAuthURL)
+	u, _ := url.Parse(r.Config.CASAuthURL)
 	q := u.Query()
 
 	// Encode Discord values into the redirect
-	re, _ := url.Parse(r.CASRedirectURL)
+	re, _ := url.Parse(r.Config.CASRedirectURL)
 	reque := re.Query()
 	reque.Add("guild", ch.GuildID)
 	reque.Add("discordID", ctx.Msg.Author.ID)

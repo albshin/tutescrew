@@ -10,15 +10,15 @@ import (
 	"time"
 
 	"github.com/albshin/teamRPI-bot/commands"
+	"github.com/albshin/teamRPI-bot/config"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 var (
-	casAuthURL     string // URL to authenticate to
-	casRedirectURL string // URL to redirect to
-	session        *discordgo.Session
+	cfg     config.CASConfig
+	session *discordgo.Session
 )
 
 // Refer to https://github.com/go-cas/cas/blob/fd85b5ae8a14a3e4a3989833499caecb4542fdf0/xml_service_response.go
@@ -42,11 +42,10 @@ type casAuthenticationSuccess struct {
 }
 
 // Router creates a new configured router
-func Router(auth, redirect string, sess *discordgo.Session) *httprouter.Router {
+func Router(c config.CASConfig, sess *discordgo.Session) *httprouter.Router {
 	r := httprouter.New()
 
-	casAuthURL = auth
-	casRedirectURL = redirect
+	cfg = c
 	session = sess
 
 	r.GET("/auth/cas", handleCAS)
@@ -63,12 +62,12 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	//TODO: Check if user has Student role
 
 	// Validate received ticket
-	u, _ := url.Parse(casAuthURL)
+	u, _ := url.Parse(cfg.CASAuthURL)
 	val, _ := url.Parse("serviceValidate")
 	u = u.ResolveReference(val)
 
 	q := u.Query()
-	srvc, _ := url.Parse(casRedirectURL)
+	srvc, _ := url.Parse(cfg.CASRedirectURL)
 	srvcq := srvc.Query()
 	srvcq.Add("discordID", usrid)
 	srvcq.Add("guild", gid)
