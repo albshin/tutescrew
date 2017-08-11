@@ -1,6 +1,8 @@
 {
     "Token": "",
     "Prefix": "",
-    "CASAuthURL": "",
-    "CASRedirectURL": ""
+    "CAS": {
+        "CASAuthURL": "",
+        "CASRedirectURL": ""
+    }
 }
