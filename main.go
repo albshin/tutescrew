@@ -59,7 +59,7 @@ func main() {
 
 	fmt.Println("Bot is running...")
 
-	r := router.Router(config.CASAuthURL, config.CASRedirectURL)
+	r := router.Router(config.CASAuthURL, config.CASRedirectURL, dg)
 	http.ListenAndServe(":8080", r)
 
 	fmt.Println("Web server is running...")

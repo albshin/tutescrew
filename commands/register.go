@@ -20,7 +20,7 @@ func (r *Register) handle(ctx Context) error {
 	}
 	g, _ := ctx.Sess.State.Guild(ch.GuildID)
 
-	rid, _ := getRoleIDByName("Student", g)
+	rid, _ := GetRoleIDByName("Student", g)
 	mem, _ := ctx.Sess.GuildMember(ch.GuildID, ctx.Msg.Author.ID)
 	for _, role := range mem.Roles {
 		if role == rid {
@@ -32,15 +32,25 @@ func (r *Register) handle(ctx Context) error {
 	// Build the full login URL
 	u, _ := url.Parse(r.CASAuthURL)
 	q := u.Query()
-	q.Add("service", r.CASRedirectURL)
+
+	// Encode Discord values into the redirect
+	re, _ := url.Parse(r.CASRedirectURL)
+	reque := re.Query()
+	reque.Add("guild", ch.GuildID)
+	reque.Add("discordID", ctx.Msg.Author.ID)
+	re.RawQuery = reque.Encode()
+
+	// Add redirect to url
+	q.Add("service", re.String())
 	u.RawQuery = q.Encode()
 
-	ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "Please go to "+u.String()+" to start the registration process.")
+	usrch, _ := ctx.Sess.UserChannelCreate(ctx.Msg.Author.ID)
+	ctx.Sess.ChannelMessageSend(usrch.ID, "Please go to "+u.String()+" to start the registration process.")
 
 	return nil
 }
 
 func (r *Register) description() string {
-	return "Allows the user to register for the \"student role\". A valid RCSID is required."
+	return "Allows the user to start the student validation process. Upon success, the user with receive the \"student\" role."
 }
 func (r *Register) usage() string { return "" }

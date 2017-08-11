@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func getRoleIDByName(name string, g *discordgo.Guild) (string, error) {
+func GetRoleIDByName(name string, g *discordgo.Guild) (string, error) {
 	for _, role := range g.Roles {
 		if role.Name == name {
 			return role.ID, nil
