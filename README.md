@@ -1,15 +1,22 @@
 # TuteScrew
 
-TuteScrew is a Discord chat bot written in Go for teamRPI's Discord.
+TuteScrew is a Discord chat bot written in Go for teamRPI's Discord. The goal of TuteScrew is to be fast, efficient, and easily expandable in the future.
 
-# Getting Started
-## Installation
+Featuring...
+- RPI Student Verification via CAS
+
+With support to come for...
+- Pickup game (PUG) scheduling and stat tracking
+- Additional moderation features
+
+## Getting Started
+### Installation
 
 1. Install Go
 2. Run `go get github.com/albshin/tutescrew`
 3. Fill out the configuration file *see below*
 
-## Configuration
+### Configuration
 
 The configuration file must be filled out before the bot can run.
 

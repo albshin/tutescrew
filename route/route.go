@@ -49,7 +49,6 @@ func Router(c config.CASConfig, sess *discordgo.Session) *httprouter.Router {
 	session = sess
 
 	r.GET("/auth/cas", handleCAS)
-	r.GET("/auth/cas/success", handleCASSuccess)
 
 	return r
 }
@@ -69,7 +68,7 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	q := u.Query()
 	srvc, _ := url.Parse(cfg.CASRedirectURL)
 	srvcq := srvc.Query()
-	srvcq.Add("discordID", usrid)
+	srvcq.Add("discord_id", usrid)
 	srvcq.Add("guild", gid)
 	srvc.RawQuery = srvcq.Encode()
 	q.Add("ticket", r.FormValue("ticket"))
@@ -109,10 +108,6 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// TODO: store username in database
 
 	//http.Redirect(w, r, "/auth/cas/success", http.StatusTemporaryRedirect)
-}
-
-func handleCASSuccess(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w.Write([]byte("Success"))
 }
 
 // Improve error handling

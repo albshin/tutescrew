@@ -38,7 +38,7 @@ func (r *Register) handle(ctx Context) error {
 	re, _ := url.Parse(r.Config.CASRedirectURL)
 	reque := re.Query()
 	reque.Add("guild", ch.GuildID)
-	reque.Add("discordID", ctx.Msg.Author.ID)
+	reque.Add("discord_id", ctx.Msg.Author.ID)
 	re.RawQuery = reque.Encode()
 
 	// Add redirect to url
