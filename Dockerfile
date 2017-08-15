@@ -8,11 +8,17 @@ ADD . /go/src/github.com/albshin/tutescrew
 
 RUN apk --no-cache add git
 
-RUN go get github.com/albshin/tutescrew
+RUN go get -d github.com/albshin/tutescrew
 RUN go install github.com/albshin/tutescrew
 
 RUN apk del git
 
+# Copy config over to binary
+RUN cp /go/src/github.com/albshin/tutescrew/config.json /go/bin/config.json
+
+RUN chmod -R 700 /go/bin/tutescrew
+
+WORKDIR /go/bin
 ENTRYPOINT /go/bin/tutescrew
 
 EXPOSE 8080
