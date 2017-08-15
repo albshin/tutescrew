@@ -6,7 +6,12 @@ RUN mkdir -p /go/src/github.com/albshin/tutescrew
 
 ADD . /go/src/github.com/albshin/tutescrew
 
+RUN apk --no-cache add git
+
+RUN go get github.com/albshin/tutescrew
 RUN go install github.com/albshin/tutescrew
+
+RUN apk del git
 
 ENTRYPOINT /go/bin/tutescrew
 
