@@ -11,6 +11,7 @@ import (
 
 	"github.com/albshin/tutescrew/commands"
 	"github.com/albshin/tutescrew/config"
+	"github.com/albshin/tutescrew/database"
 	"github.com/albshin/tutescrew/route"
 	"github.com/bwmarrin/discordgo"
 )
@@ -25,6 +26,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Config could not be read correctly!")
 	}
+
+	// Open database
+	database.Connect()
 
 	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
