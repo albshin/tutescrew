@@ -56,7 +56,7 @@ func Router(c config.CASConfig, sess *discordgo.Session) *httprouter.Router {
 func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// Get query values
 	gid := r.URL.Query().Get("guild")
-	usrid := r.URL.Query().Get("discordID")
+	usrid := r.URL.Query().Get("discord_id")
 
 	//TODO: Check if user has Student role
 
