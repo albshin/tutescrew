@@ -11,7 +11,6 @@ import (
 
 	"github.com/albshin/tutescrew/commands"
 	"github.com/albshin/tutescrew/config"
-	"github.com/albshin/tutescrew/database"
 	"github.com/albshin/tutescrew/route"
 	"github.com/bwmarrin/discordgo"
 )
@@ -28,7 +27,7 @@ func main() {
 	}
 
 	// Open database
-	database.Connect()
+	//database.Connect()
 
 	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
@@ -37,6 +36,7 @@ func main() {
 	}
 
 	dg.AddHandler(messageCreate)
+	dg.AddHandler(guildMemberAdd)
 
 	h = &commands.Handler{Commands: make(map[string]commands.Command)}
 	h.AddCommand("register", &commands.Register{Config: cfg.CASInfo})
@@ -74,18 +74,18 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	cmd := splt[0][1:]
 	args := splt[1:]
 
-	// Get relevant info to pass
-	/*
-		ch, err := s.State.Channel(m.ChannelID)
-		if err != nil {
-			fmt.Println("Could not get channel")
-		}
-		g, err := s.State.Guild(ch.GuildID)
-		if err != nil {
-			fmt.Println("Could not get guild")
-		}
-	*/
-
 	ctx := commands.Context{Cmd: cmd, Args: args, Msg: m, Sess: s}
 	h.Handle(ctx)
+}
+
+func guildMemberAdd(s *discordgo.Session, g *discordgo.GuildMemberAdd) {
+	// TODO: Configurable welcome message channel and msg
+	gld, _ := s.Guild(g.GuildID)
+	for _, ch := range gld.Channels {
+		if ch.Name == "general" {
+			s.ChannelMessageSend(ch.ID, "Welcome "+"<@"+g.Member.User.ID+">!"+
+				" If you are a student, please enter `"+cfg.Prefix+"register`"+
+				" to verify that you are a student to gain full access to this Discord!")
+		}
+	}
 }
