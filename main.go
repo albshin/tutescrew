@@ -11,6 +11,7 @@ import (
 
 	"github.com/albshin/tutescrew/commands"
 	"github.com/albshin/tutescrew/config"
+	"github.com/albshin/tutescrew/database"
 	"github.com/albshin/tutescrew/route"
 	"github.com/bwmarrin/discordgo"
 )
@@ -27,7 +28,7 @@ func main() {
 	}
 
 	// Open database
-	//database.Connect()
+	database.Connect()
 
 	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
@@ -58,6 +59,7 @@ func main() {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-c
 	dg.Close()
+	database.DB.Close()
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -74,8 +76,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	cmd := splt[0][1:]
 	args := splt[1:]
 
-	ctx := commands.Context{Cmd: cmd, Args: args, Msg: m, Sess: s}
-	h.Handle(ctx)
+	ctx := &commands.Context{Cmd: cmd, Args: args, Msg: m, Sess: s}
+	h.Handle(*ctx)
 }
 
 func guildMemberAdd(s *discordgo.Session, g *discordgo.GuildMemberAdd) {

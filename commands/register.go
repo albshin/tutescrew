@@ -21,13 +21,9 @@ func (r *Register) handle(ctx Context) error {
 	}
 	g, _ := ctx.Sess.State.Guild(ch.GuildID)
 
-	rid, _ := GetRoleIDByName("Student", g)
-	mem, _ := ctx.Sess.GuildMember(ch.GuildID, ctx.Msg.Author.ID)
-	for _, role := range mem.Roles {
-		if role == rid {
-			ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "You are already registered!")
-			return errors.New("already registered")
-		}
+	if UserHasRoleByGuild("Student", ctx.Msg.Author.ID, g) {
+		ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "You are already a student!")
+		return errors.New("already registered")
 	}
 
 	// Build the full login URL

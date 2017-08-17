@@ -11,6 +11,7 @@ import (
 
 	"github.com/albshin/tutescrew/commands"
 	"github.com/albshin/tutescrew/config"
+	"github.com/albshin/tutescrew/database"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/julienschmidt/httprouter"
@@ -56,9 +57,7 @@ func Router(c config.CASConfig, sess *discordgo.Session) *httprouter.Router {
 func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// Get query values
 	gid := r.URL.Query().Get("guild")
-	usrid := r.URL.Query().Get("discord_id")
-
-	//TODO: Check if user has Student role
+	uid := r.URL.Query().Get("discord_id")
 
 	// Validate received ticket
 	u, _ := url.Parse(cfg.CASAuthURL)
@@ -68,7 +67,7 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	q := u.Query()
 	srvc, _ := url.Parse(cfg.CASRedirectURL)
 	srvcq := srvc.Query()
-	srvcq.Add("discord_id", usrid)
+	srvcq.Add("discord_id", uid)
 	srvcq.Add("guild", gid)
 	srvc.RawQuery = srvcq.Encode()
 	q.Add("ticket", r.FormValue("ticket"))
@@ -97,17 +96,24 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	uname := strings.ToLower(handleCASResponse(body))
+
+	//Check if RCSID is mapped to a different account
+
+	if database.IsRegistered(uname, uid) {
+		w.Write([]byte("This RCSID is already registered to an account!"))
+		return
+	}
+
 	if uname != "" {
 		g, _ := session.Guild(gid)
 		rid, _ := commands.GetRoleIDByName("Student", g)
-		session.GuildMemberRoleAdd(gid, usrid, rid)
+		session.GuildMemberRoleAdd(gid, uid, rid)
 		w.Write([]byte("Success! You may now close this window."))
 	} else {
 		w.Write([]byte("Failure"))
 	}
-	// TODO: store username in database
 
-	//http.Redirect(w, r, "/auth/cas/success", http.StatusTemporaryRedirect)
+	database.AddStudent(uname, uid)
 }
 
 // Improve error handling

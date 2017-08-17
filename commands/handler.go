@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -32,7 +34,13 @@ func (h *Handler) AddCommand(c string, cmd Command) {
 // Handle creates a new goroutine to handle the command
 func (h *Handler) Handle(ctx Context) {
 	if obj, ok := h.Commands[ctx.Cmd]; ok {
-		go obj.handle(ctx)
+		if obj.usage() == "" && (len(ctx.Args) > 0) {
+			return
+		} else if obj.usage() != "" && (len(strings.Split(obj.usage(), " ")) != len(ctx.Args)) {
+			return
+		} else {
+			go obj.handle(ctx)
+		}
 	} else {
 		ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "Command does not exist!")
 	}
