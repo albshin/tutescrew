@@ -19,6 +19,7 @@ type Command interface {
 	handle(Context) error
 	description() string
 	usage() string
+	canDM() bool
 }
 
 // Handler holds a map of all active commands to be handled
@@ -34,6 +35,10 @@ func (h *Handler) AddCommand(c string, cmd Command) {
 // Handle creates a new goroutine to handle the command
 func (h *Handler) Handle(ctx Context) {
 	if obj, ok := h.Commands[ctx.Cmd]; ok {
+		if obj.canDM() == false && IsDirectMessage(ctx.Msg.ChannelID, ctx.Sess) {
+			return
+		}
+
 		if obj.usage() == "" && (len(ctx.Args) > 0) {
 			return
 		} else if obj.usage() != "" && (len(strings.Split(obj.usage(), " ")) != len(ctx.Args)) {
@@ -41,7 +46,5 @@ func (h *Handler) Handle(ctx Context) {
 		} else {
 			go obj.handle(ctx)
 		}
-	} else {
-		ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "Command does not exist!")
 	}
 }

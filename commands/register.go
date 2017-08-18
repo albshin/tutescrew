@@ -21,7 +21,7 @@ func (r *Register) handle(ctx Context) error {
 	}
 	g, _ := ctx.Sess.State.Guild(ch.GuildID)
 
-	if UserHasRoleByGuild("Student", ctx.Msg.Author.ID, g) {
+	if UserIDHasRoleByGuild("Student", ctx.Msg.Author.ID, g) {
 		ctx.Sess.ChannelMessageSend(ctx.Msg.ChannelID, "You are already a student!")
 		return errors.New("already registered")
 	}
@@ -51,3 +51,4 @@ func (r *Register) description() string {
 	return "Allows the user to start the student validation process. Upon success, the user with receive the \"student\" role."
 }
 func (r *Register) usage() string { return "" }
+func (r *Register) canDM() bool   { return false }

@@ -83,11 +83,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 func guildMemberAdd(s *discordgo.Session, g *discordgo.GuildMemberAdd) {
 	// TODO: Configurable welcome message channel and msg
 	gld, _ := s.Guild(g.GuildID)
+	rid, _ := commands.GetRoleIDByName("Newcomer", gld)
+	s.GuildMemberRoleAdd(g.GuildID, g.User.ID, rid)
+
 	for _, ch := range gld.Channels {
-		if ch.Name == "general" {
-			s.ChannelMessageSend(ch.ID, "Welcome "+"<@"+g.Member.User.ID+">!"+
-				" If you are a student, please enter `"+cfg.Prefix+"register`"+
-				" to verify that you are a student to gain full access to this Discord!")
+		if ch.Name == "welcome" {
+			s.ChannelMessageSend(ch.ID, "Welcome "+"<@"+g.Member.User.ID+">!\n\n"+
+				"You must be tagged in order to gain full access to this Discord.\n"+
+				"If you are a student, please enter `"+cfg.Prefix+"register`"+
+				" to verify your enrollment status.\nIf you are not a currently enrolled"+
+				" student, please message an admin to get tagged.")
 		}
 	}
 }

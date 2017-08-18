@@ -98,7 +98,6 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	uname := strings.ToLower(handleCASResponse(body))
 
 	//Check if RCSID is mapped to a different account
-
 	if database.IsRegistered(uname, uid) {
 		w.Write([]byte("This RCSID is already registered to an account!"))
 		return
@@ -108,6 +107,13 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		g, _ := session.Guild(gid)
 		rid, _ := commands.GetRoleIDByName("Student", g)
 		session.GuildMemberRoleAdd(gid, uid, rid)
+
+		// Remove Newcomer role
+		if commands.UserIDHasRoleByGuild("Newcomer", uid, g) {
+			n, _ := commands.GetRoleIDByName("Newcomer", g)
+			session.GuildMemberRoleRemove(gid, uid, n)
+		}
+
 		w.Write([]byte("Success! You may now close this window."))
 	} else {
 		w.Write([]byte("Failure"))
