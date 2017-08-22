@@ -2,6 +2,7 @@ package route
 
 import (
 	"encoding/xml"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -51,31 +52,47 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	if u != "" {
-		gld, _ := session.Guild(g)
-		rid, _ := commands.GetRoleIDByName("Student", gld)
+		gld, err := session.Guild(g)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		rid, err := commands.GetRoleIDByName("Student", gld)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		session.GuildMemberRoleAdd(g, d, rid)
 
 		// Remove Newcomer role
 		if commands.UserIDHasRoleByGuild("Newcomer", d, gld) {
-			n, _ := commands.GetRoleIDByName("Newcomer", gld)
+			n, err := commands.GetRoleIDByName("Newcomer", gld)
+			if err != nil {
+				log.Println(err)
+			}
 			session.GuildMemberRoleRemove(g, d, n)
 		}
 
+		database.AddStudent(u, d)
 		w.Write([]byte("Success! You may now close this window."))
 	} else {
 		w.Write([]byte("Failure"))
 	}
-
-	database.AddStudent(u, d)
 }
 
 func validateCAS(r *http.Request) (string, error) {
-	u, _ := getValidationURL(r)
+	u, err := getValidationURL(r)
+	if err != nil {
+		return "", err
+	}
 
 	c := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	req, _ := http.NewRequest("GET", u, nil)
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return "", err
+	}
 	r.Header.Add("User-Agent", "TuteScrew Discord Bot")
 
 	resp, err := c.Do(req)
@@ -85,12 +102,12 @@ func validateCAS(r *http.Request) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalln("Failed to get ticket validation")
+		return "", errors.New("failed to get ticket validation")
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return "", errors.New("unable to read validation body")
 	}
 
 	return strings.ToLower(handleCASResponse(body)), nil
@@ -126,8 +143,14 @@ func getServiceURL(r *http.Request) (string, error) {
 }
 
 func getValidationURL(r *http.Request) (string, error) {
-	u, _ := url.Parse(cfg.CASAuthURL)
-	v, _ := url.Parse("serviceValidate")
+	u, err := url.Parse(cfg.CASAuthURL)
+	if err != nil {
+		return "", err
+	}
+	v, err := url.Parse("serviceValidate")
+	if err != nil {
+		return "", err
+	}
 	u = u.ResolveReference(v)
 
 	srv, err := getServiceURL(r)
