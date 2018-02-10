@@ -33,7 +33,7 @@ func UserIDHasRoleByGuild(roleName, userID string, g *discordgo.Guild) bool {
 
 // IsDirectMessage checks if a channel is a DM
 func IsDirectMessage(channelID string, s *discordgo.Session) bool {
-	if c, _ := s.Channel(channelID); c.IsPrivate {
+	if c, _ := s.Channel(channelID); c.Type == discordgo.ChannelTypeDM {
 		return true
 	}
 	return false

@@ -7,7 +7,7 @@ WORKDIR ${GOPATH}/src/github.com/albshin/tutescrew
 
 COPY . .
 
-RUN go build -o tutescrew cmd/albshin/main.go
+RUN go build -o tutescrew cmd/tutescrew/main.go
 
 EXPOSE 8080
 
