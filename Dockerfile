@@ -1,4 +1,3 @@
-
 FROM golang:1.10 AS builder
 LABEL maintainer "Albert Shin <shina2@rpi.edu>"
 
@@ -17,10 +16,6 @@ FROM alpine:latest
 COPY --from=builder /app ./
 
 RUN apk --no-cache add ca-certificates
-
-ENV TUTESCREW_TOKEN="MzQ5NjMyMTkwMzk4ODU3MjE3.Den-7Q.fzF_3v-5ruO4Gl0dGKq1SUf37CM"
-ENV TUTESCREW_CAS_AUTHURL="https://cas-auth.rpi.edu/cas/login"
-ENV TUTESCREW_CAS_REDIRECTURL="http://localhost:8080/auth/cas"
 
 ENTRYPOINT ["./app"]
 
