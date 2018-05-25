@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/albshin/tutescrew/commands"
-	"github.com/albshin/tutescrew/database"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -36,18 +35,14 @@ type casAuthenticationSuccess struct {
 }
 
 func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Println("HANDLING!")
+
 	// Get query values
 	g := r.URL.Query().Get("guild")
 	d := r.URL.Query().Get("discord_id")
 
 	u, err := validateCAS(r)
 	if err != nil {
-		return
-	}
-
-	//Check if RCSID is mapped to a different account
-	if database.IsRegistered(u, d) {
-		w.Write([]byte("This RCSID is already registered to an account!"))
 		return
 	}
 
@@ -73,7 +68,6 @@ func handleCAS(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 			session.GuildMemberRoleRemove(g, d, n)
 		}
 
-		database.AddStudent(u, d)
 		w.Write([]byte("Success! You may now close this window."))
 	} else {
 		w.Write([]byte("Failure"))
@@ -129,7 +123,7 @@ func handleCASResponse(r []byte) string {
 	return c.Success.User
 }
 func getServiceURL(r *http.Request) (string, error) {
-	u, err := url.Parse(cfg.CASRedirectURL)
+	u, err := url.Parse(cfg.RedirectURL)
 	if err != nil {
 		return "", err
 	}
@@ -143,7 +137,7 @@ func getServiceURL(r *http.Request) (string, error) {
 }
 
 func getValidationURL(r *http.Request) (string, error) {
-	u, err := url.Parse(cfg.CASAuthURL)
+	u, err := url.Parse(cfg.AuthURL)
 	if err != nil {
 		return "", err
 	}

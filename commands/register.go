@@ -26,14 +26,14 @@ func (r *Register) handle(ctx Context) error {
 	}
 
 	// Build the full login URL
-	u, err := url.Parse(r.Config.CASAuthURL)
+	u, err := url.Parse(r.Config.AuthURL)
 	if err != nil {
 		return err
 	}
 	q := u.Query()
 
 	// Encode Discord values into the redirect
-	re, err := url.Parse(r.Config.CASRedirectURL)
+	re, err := url.Parse(r.Config.RedirectURL)
 	if err != nil {
 		return err
 	}

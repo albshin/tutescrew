@@ -11,24 +11,29 @@ import (
 
 	"github.com/albshin/tutescrew/commands"
 	"github.com/albshin/tutescrew/config"
-	"github.com/albshin/tutescrew/database"
 	"github.com/albshin/tutescrew/route"
 	"github.com/bwmarrin/discordgo"
+	"github.com/kelseyhightower/envconfig"
 )
 
+// Configuration holds environment variables
+type Configuration struct {
+	Token  string `required:"true"`
+	Prefix string `default:"$"`
+	CAS    config.CASConfig
+}
+
 var (
-	cfg config.Configuration
 	h   *commands.Handler
+	cfg Configuration
 )
 
 func main() {
-	err := config.LoadConfig(&cfg)
+	// Read config from env variables
+	err := envconfig.Process("tutescrew", &cfg)
 	if err != nil {
-		log.Fatal("Config could not be read correctly!")
+		log.Fatal(err.Error())
 	}
-
-	// Open database
-	database.Connect()
 
 	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
@@ -40,7 +45,7 @@ func main() {
 	dg.AddHandler(guildMemberAdd)
 
 	h = &commands.Handler{Commands: make(map[string]commands.Command)}
-	h.AddCommand("register", &commands.Register{Config: cfg.CASInfo})
+	h.AddCommand("register", &commands.Register{Config: cfg.CAS})
 
 	err = dg.Open()
 	if err != nil {
@@ -50,7 +55,7 @@ func main() {
 
 	fmt.Println("Bot is running...")
 
-	r := route.Router(cfg.CASInfo, dg)
+	r := route.Router(cfg.CAS, dg)
 	http.ListenAndServe(":8080", r)
 
 	fmt.Println("Web server is running...")
@@ -59,7 +64,6 @@ func main() {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-c
 	dg.Close()
-	database.DB.Close()
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -89,7 +93,6 @@ func guildMemberAdd(s *discordgo.Session, g *discordgo.GuildMemberAdd) {
 	for _, ch := range gld.Channels {
 		if ch.Name == "welcome" {
 			s.ChannelMessageSend(ch.ID, "Welcome "+"<@"+g.Member.User.ID+">!\n\n"+
-				"You must be tagged in order to gain full access to this Discord.\n"+
 				"If you are a student, please enter `"+cfg.Prefix+"register`"+
 				" to verify your enrollment status.\nIf you are not a currently enrolled"+
 				" student, please message an admin to get tagged.")

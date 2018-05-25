@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/boltdb/bolt"
-  packages = ["."]
-  revision = "2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8"
-  version = "v1.3.1"
-
-[[projects]]
   name = "github.com/bwmarrin/discordgo"
   packages = ["."]
   revision = "4a33b9bc7c56cfdb9bb244e33e83cb3941fe2bdc"
@@ -26,20 +20,24 @@
   version = "v1.1"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/crypto"
-  packages = ["nacl/secretbox","poly1305","salsa20/salsa"]
-  revision = "5119cf507ed5294cc409c092980c7497ee5d6fd2"
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
-  name = "golang.org/x/sys"
-  packages = ["unix"]
-  revision = "37707fdb30a5b38865cfb95e5aab41707daec7fd"
+  name = "golang.org/x/crypto"
+  packages = [
+    "nacl/secretbox",
+    "poly1305",
+    "salsa20/salsa"
+  ]
+  revision = "a3beeb748656e13e54256fd2cde19e058f41f60f"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9b6e35973f2d637158598bb9a7f492f78b1570b22992d4ef7a37b411be643566"
+  inputs-digest = "7a15c8194b61b45f7b07334372ab1a1b5715f0a2abf7d881552792fead7e9bf5"
   solver-name = "gps-cdcl"
   solver-version = 1

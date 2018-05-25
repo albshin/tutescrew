@@ -2,8 +2,8 @@ package route
 
 import (
 	"github.com/albshin/tutescrew/config"
-	"github.com/bwmarrin/discordgo"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/julienschmidt/httprouter"
 )
 
